@@ -31,14 +31,16 @@ class posts(db.Model):
     postName = db.Column(db.String(100))
     postDescription = db.Column(db.String(500))
     postLike = db.Column(db.Integer)
+    postTime = db.Column(db.String(50))
 
     #postR = db.relationship('postComment', backref='postComment.postID', primaryjoin='posts.id==postComments.postID', lazy='joined')
 
-    def __init__(self, name, postName, postDescription, postLike):
+    def __init__(self, name, postName, postDescription, postLike, postTime):
         self.name = name
         self.postName = postName
         self.postDescription = postDescription
         self.postLike = postLike
+        self.postTime = postTime
 
 class postComment(db.Model):
     __tablename__ = "postComment"
@@ -58,7 +60,7 @@ class postComment(db.Model):
 #posts Schema
 class PostsSchema(ma.Schema):
     class Meta:
-        fields = ('id', 'name', 'postName', 'postDescription', 'postLike')
+        fields = ('id', 'name', 'postName', 'postDescription', 'postLike', 'postTime')
 
 class CommentsSchema(ma.Schema):
     class Meta:
