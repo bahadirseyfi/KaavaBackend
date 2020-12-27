@@ -78,8 +78,9 @@ def add_posts():
     postName = request.json['postName']
     postDescription = request.json['postDescription']
     postLike = request.json['postLike']
+    postTime = request.json['postTime']
 
-    new_posts = posts(name, postName, postDescription, postLike)
+    new_posts = posts(name, postName, postDescription, postLike, postTime)
 
     db.session.add(new_posts)
     db.session.commit()
@@ -90,7 +91,7 @@ def add_posts():
 def get_one_post(id):
     gelen_post = posts.query.get(id)
     gelen_yorum = postComment.query.get(id)
-    return posts_schema.jsonify(gelen_post),comments_schema.jsonify(gelen_yorum)
+    return posts_schema.jsonify(gelen_post), comments_schema.jsonify(gelen_yorum)
 
 # Get All postss
 @app.route('/posts', methods=['GET'])
@@ -107,7 +108,7 @@ def get_comment_post(id):
     connection = sqlite3.connect('db.sqlite')
     cur = connection.cursor()
     comment_id = postComment.query.get(id)
-    twoTable = cur.execute("""SELECT posts.id, posts.name, posts.postDescription, posts.postLike, posts.postDate, postComment.commentPost, postComment.senderName, commentDate FROM posts inner join postComment WHERE postComment.postID = posts.id AND posts.id = ?""",(id))
+    twoTable = cur.execute("""SELECT posts.id, posts.name, posts.postDescription, posts.postLike, posts.postTime, postComment.commentPost, postComment.senderName, commentTime FROM posts inner join postComment WHERE postComment.postID = posts.id AND posts.id = ?""",(id))
     twoTable = twoTable.fetchall()
     connection.close()
     return jsonify(twoTable)
@@ -134,4 +135,4 @@ def user_delete(id):
 
 # Run the Server
 if __name__ == '__main__':
-    app.run(host='0.0.0.0' , port=6001 ,debug=True)
+    app.run(host='0.0.0.0', port=6001, debug=True)
