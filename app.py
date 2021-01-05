@@ -117,13 +117,9 @@ def get_comment_post(id):
 
 @app.route('/posts/<id>', methods=['GET'])
 def get_posts_id(id):
-
     #post = posts.query.get(id)
-    comments = postComment.query.get(id)
-
-    # I want to do this -> comments_schema + posts_schema . jsonify(post,comments)
-    #HOW CAN I DO
-    return comments_schema.jsonify(comments)
+    post = posts.query.get(id)
+    return posts_schema.jsonify(post)
 
 
 @app.route("/posts/<id>", methods=["DELETE"])
