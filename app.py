@@ -49,8 +49,7 @@ class postComment(db.Model):
     senderName = db.Column(db.String(20))
     commentPost = db.Column(db.String(300))
 
-    #userR = db.relationship('posts', foreign_keys='posts.id')
-    #post = db.relationship("posts", backref="postComment")
+
 
     def __init__(self, postID, senderName, commentPost):
         self.postID = postID
@@ -68,7 +67,7 @@ class CommentsSchema(ma.Schema):
 
 class PostAndCommentSchema(ma.Schema):
     class Meta:
-        fields = ('id','name','postName','postDescription','postLike','postTime','commentPost','senderName','commentTime')
+        fields = ('id', 'name', 'postName', 'postDescription', 'postLike', 'postTime', 'commentPost', 'senderName', 'commentTime')
 
 #Init Schema
 posts_schema = PostsSchema()
@@ -90,11 +89,26 @@ def add_posts():
     postTime = request.json['postTime']
 
     new_posts = posts(name, postName, postDescription, postLike, postTime)
-
+    print(new_posts)
     db.session.add(new_posts)
     db.session.commit()
 
     return posts_schema.jsonify(new_posts)
+
+@app.route('/comments',methods=['POST'])
+def comment_add():
+    postID = request.json['postID']
+    senderName = request.json['senderName']
+    commentPost = request.json['commentPost']
+
+    print(postID, senderName)
+    new_comment = postComment(postID, senderName, commentPost)
+
+    print(new_comment)
+    db.session.add(new_comment)
+    db.session.commmit()
+
+    return jsonify(new_comment)
 
 @app.route('/post/<id>',methods=['GET'])
 def get_one_post(id):
