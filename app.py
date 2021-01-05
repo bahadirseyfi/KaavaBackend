@@ -66,9 +66,16 @@ class CommentsSchema(ma.Schema):
     class Meta:
         fields = ('id', 'postID', 'senderName', 'commentPost')
 
+class PostAndCommentSchema(ma.Schema):
+    class Meta:
+        fields = ('id','name','postName','postDescription','postLike','postTime','commentPost','senderName','commentTime')
+
 #Init Schema
 posts_schema = PostsSchema()
 posts_schema2 = PostsSchema(many=True)
+
+postandcomment_schema = PostAndCommentSchema()
+postandcomment_schema2 = PostAndCommentSchema(many=True)
 
 comments_schema = CommentsSchema()
 comments_schema2 = CommentsSchema(many=True)
@@ -104,21 +111,36 @@ def get_posts():
     result = posts_schema2.dump(all_posts)
     #comment = comments_schema2.dump(all_comments)
     #return jsonify(result, comment)
+    print(result)
     return jsonify(result)
+
 @app.route('/postComments/<id>',methods=['GET'])
 def get_comment_post(id):
     connection = sqlite3.connect('db.sqlite')
     cur = connection.cursor()
     comment_id = postComment.query.get(id)
-    twoTable = cur.execute("""SELECT posts.id, posts.name, posts.postDescription, posts.postLike, posts.postTime, postComment.commentPost, postComment.senderName, commentTime FROM posts inner join postComment WHERE postComment.postID = posts.id AND posts.id = ?""",(id))
+    twoTable = cur.execute("""SELECT posts.id, posts.name, posts.postName, posts.postDescription, posts.postLike, posts.postTime, postComment.commentPost, postComment.senderName, commentTime FROM posts inner join postComment WHERE postComment.postID = posts.id AND posts.id = ?""",(id))
     twoTable = twoTable.fetchall()
+
+    payload = []
+    content = {}
+
+    for result in twoTable:
+        content = {'id': result[0], 'name': result[1],'postName':result[2], 'postDescription':result[3],'postLike':result[4],'postTime':result[5],'commentPost':result[6],'senderName':result[7],'commentTime':result[8]}
+        payload.append(content)
+        content = {}
+
     connection.close()
-    return jsonify(twoTable)
+    #result = postandcomment_schema.dump(twoTable)
+    return jsonify(payload)
+
+@app.route(('/postComments/<postID>/'))
 
 @app.route('/posts/<id>', methods=['GET'])
 def get_posts_id(id):
     #post = posts.query.get(id)
     post = posts.query.get(id)
+    print(posts_schema.jsonify(post))
     return posts_schema.jsonify(post)
 
 
