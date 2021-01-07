@@ -48,13 +48,14 @@ class postComment(db.Model):
     postID = db.Column(db.Integer)
     senderName = db.Column(db.String(20))
     commentPost = db.Column(db.String(300))
+    commentTime = db.Column(db.String(300))
 
 
-
-    def __init__(self, postID, senderName, commentPost):
+    def __init__(self, postID, senderName, commentPost, commentTime):
         self.postID = postID
         self.senderName = senderName
         self.commentPost = commentPost
+        self.commentTime = commentTime
 
 #posts Schema
 class PostsSchema(ma.Schema):
@@ -63,7 +64,7 @@ class PostsSchema(ma.Schema):
 
 class CommentsSchema(ma.Schema):
     class Meta:
-        fields = ('id', 'postID', 'senderName', 'commentPost')
+        fields = ('id', 'postID', 'senderName', 'commentPost', 'commentTime')
 
 class PostAndCommentSchema(ma.Schema):
     class Meta:
@@ -100,15 +101,15 @@ def comment_add():
     postID = request.json['postID']
     senderName = request.json['senderName']
     commentPost = request.json['commentPost']
+    commentTime = request.json['commentTime']
 
-    print(postID, senderName)
-    new_comment = postComment(postID, senderName, commentPost)
+    new_comment = postComment(postID, senderName, commentPost, commentTime)
 
     print(new_comment)
     db.session.add(new_comment)
-    db.session.commmit()
+    db.session.commit()
 
-    return jsonify(new_comment)
+    return comments_schema.jsonify(new_comment)
 
 @app.route('/post/<id>',methods=['GET'])
 def get_one_post(id):
@@ -135,20 +136,28 @@ def get_comment_post(id):
     comment_id = postComment.query.get(id)
     twoTable = cur.execute("""SELECT posts.id, posts.name, posts.postName, posts.postDescription, posts.postLike, posts.postTime, postComment.commentPost, postComment.senderName, commentTime FROM posts inner join postComment WHERE postComment.postID = posts.id AND posts.id = ?""",(id))
     twoTable = twoTable.fetchall()
-
     payload = []
     content = {}
-
+    #for result in twoTable:
+    #    content = {'id': result[0], 'name': result[1],'postName':result[2], 'postDescription':result[3],'postLike':result[4],'postTime':result[5],'commentPost':result[6],'senderName':result[7],'commentTime':result[8]}
+    #    payload.append(content)
+    #    content = {}
     for result in twoTable:
-        content = {'id': result[0], 'name': result[1],'postName':result[2], 'postDescription':result[3],'postLike':result[4],'postTime':result[5],'commentPost':result[6],'senderName':result[7],'commentTime':result[8]}
-        payload.append(content)
-        content = {}
+       content = {'commentPost':result[6],'senderName':result[7],'commentTime':result[8]}
+       payload.append(content)
+       content = {}
 
     connection.close()
     #result = postandcomment_schema.dump(twoTable)
     return jsonify(payload)
 
-@app.route(('/postComments/<postID>/'))
+
+@app.route('/yorumlar/<postID>',methods=['GET'])
+def get_yorumlar(postID):
+    yorumlar = postComment.query.get(postID)
+    print(comments_schema.jsonify(yorumlar))
+    return comments_schema.jsonify(yorumlar)
+
 
 @app.route('/posts/<id>', methods=['GET'])
 def get_posts_id(id):
