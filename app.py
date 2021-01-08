@@ -131,6 +131,53 @@ def comment_add():
 
     return comments_schema.jsonify(new_comment)
 
+
+@app.route('/mamaKaplari',methods=['POST'])
+def mamakaplari_post():
+    fillingTime = request.json['fillingTime']
+    longitude = request.json['longitude']
+    latitude = request.json['latitude']
+
+    new_kaava = mamaKaplari(longitude, latitude, fillingTime)
+    db.session.add(new_kaava)
+    db.session.commit()
+
+    return mamakaplari_schema.jsonify(new_kaava)
+
+@app.route('/postLike',methods=['PUT'])
+def post_like_post():
+
+    connection = sqlite3.connect('db.sqlite')
+    cur = connection.cursor()
+
+    posts_id = int(request.json['id'])
+    posts_like = int(request.json['postLike'])
+
+    update = "UPDATE posts SET postLike = postLike + "+str(posts_like)+" WHERE id = " + str(posts_id)
+
+    print(posts_id,posts_like)
+    print("update : ", update)
+    #cur.execute("""UPDATE posts SET postLike = postLike + ? WHERE id = ?""", (posts_id,posts_like,))
+    cur.execute(update)
+    connection.commit()
+
+    update_like = cur.execute("""SELECT * FROM posts """)
+    update_like = update_like.fetchall()
+    connection.close()
+    print(update_like)
+
+    return jsonify(update_like)
+
+
+
+@app.route('/mamaKaplari', methods=['GET'])
+def mamakaplari_get():
+        all_kaavas = mamaKaplari.query.all()
+        result = mamakaplari_schema2.dump(all_kaavas)
+        print(result)
+
+        return jsonify(result)
+
 @app.route('/post/<id>',methods=['GET'])
 def get_one_post(id):
     gelen_post = posts.query.get(id)
@@ -149,12 +196,7 @@ def get_posts():
     print(result)
     return jsonify(result)
 
-@app.route('/mamaKaplari',methods=['GET'])
-def mamakaplari_get():
-    all_kaavas = mamaKaplari.query.all()
-    result = mamakaplari_schema2.dump(all_kaavas)
-    print(result)
-    return jsonify(result)
+
 '''
     fillingTime = request.json['fillingTime']
     longitude = request.json['longitude']
@@ -167,7 +209,7 @@ def get_comment_post(id):
     connection = sqlite3.connect('db.sqlite')
     cur = connection.cursor()
     comment_id = postComment.query.get(id)
-    twoTable = cur.execute("""SELECT posts.id, posts.name, posts.postName, posts.postDescription, posts.postLike, posts.postTime, postComment.commentPost, postComment.senderName, commentTime FROM posts inner join postComment WHERE postComment.postID = posts.id AND posts.id = ?""",(id))
+    twoTable = cur.execute("""SELECT posts.id, posts.name, posts.postName, posts.postDescription, posts.postLike, posts.postTime, postComment.commentPost, postComment.senderName, commentTime FROM posts inner join postComment WHERE postComment.postID = posts.id AND posts.id = ? """,(id))
     twoTable = twoTable.fetchall()
     payload = []
     content = {}
