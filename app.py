@@ -57,7 +57,23 @@ class postComment(db.Model):
         self.commentPost = commentPost
         self.commentTime = commentTime
 
+class mamaKaplari(db.Model):
+    __tablename__ = "Mamalar"
+    id = db.Column(db.Integer, primary_key=True)
+    longitude = db.Column(db.String(100))
+    latitude = db.Column(db.String(100))
+    fillingTime = db.Column(db.String(100))
+
+    def __init__(self, longitude, latitude, fillingTime):
+        self.longitude = longitude
+        self.latitude = latitude
+        self.fillingTime = fillingTime
+
 #posts Schema
+class MamaSchema(ma.Schema):
+    class Meta:
+        fields = ('id','longitude','latitude','fillingTime')
+
 class PostsSchema(ma.Schema):
     class Meta:
         fields = ('id', 'name', 'postName', 'postDescription', 'postLike', 'postTime')
@@ -71,6 +87,9 @@ class PostAndCommentSchema(ma.Schema):
         fields = ('id', 'name', 'postName', 'postDescription', 'postLike', 'postTime', 'commentPost', 'senderName', 'commentTime')
 
 #Init Schema
+mamakaplari_schema = MamaSchema()
+mamakaplari_schema2 = MamaSchema(many=True)
+
 posts_schema = PostsSchema()
 posts_schema2 = PostsSchema(many=True)
 
@@ -95,6 +114,7 @@ def add_posts():
     db.session.commit()
 
     return posts_schema.jsonify(new_posts)
+
 
 @app.route('/comments',methods=['POST'])
 def comment_add():
@@ -129,6 +149,19 @@ def get_posts():
     print(result)
     return jsonify(result)
 
+@app.route('/mamaKaplari',methods=['GET'])
+def mamakaplari_get():
+    all_kaavas = mamaKaplari.query.all()
+    result = mamakaplari_schema2.dump(all_kaavas)
+    print(result)
+    return jsonify(result)
+'''
+    fillingTime = request.json['fillingTime']
+    longitude = request.json['longitude']
+    latitude = request.json['latitude']
+'''
+
+
 @app.route('/postComments/<id>',methods=['GET'])
 def get_comment_post(id):
     connection = sqlite3.connect('db.sqlite')
@@ -150,7 +183,6 @@ def get_comment_post(id):
     connection.close()
     #result = postandcomment_schema.dump(twoTable)
     return jsonify(payload)
-
 
 @app.route('/yorumlar/<postID>',methods=['GET'])
 def get_yorumlar(postID):
