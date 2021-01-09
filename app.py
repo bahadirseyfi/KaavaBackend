@@ -209,7 +209,12 @@ def get_comment_post(id):
     connection = sqlite3.connect('db.sqlite')
     cur = connection.cursor()
     comment_id = postComment.query.get(id)
-    twoTable = cur.execute("""SELECT posts.id, posts.name, posts.postName, posts.postDescription, posts.postLike, posts.postTime, postComment.commentPost, postComment.senderName, commentTime FROM posts inner join postComment WHERE postComment.postID = posts.id AND posts.id = ? """,(id))
+    if postComment.commentPost != "":
+        twoTable = cur.execute("""SELECT posts.id, posts.name, posts.postName, posts.postDescription, posts.postLike, posts.postTime, postComment.commentPost, postComment.senderName, commentTime FROM posts inner join postComment WHERE postComment.postID = posts.id AND posts.id = ? """,(id,))
+
+    else:
+        twoTable = [{}]
+
     twoTable = twoTable.fetchall()
     payload = []
     content = {}
@@ -219,8 +224,11 @@ def get_comment_post(id):
     #    content = {}
     for result in twoTable:
        content = {'commentPost':result[6],'senderName':result[7],'commentTime':result[8]}
-       payload.append(content)
-       content = {}
+       if content != None:
+            payload.append(content)
+       else:
+           payload = [{}]
+    content = {}
 
     connection.close()
     #result = postandcomment_schema.dump(twoTable)
