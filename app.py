@@ -146,29 +146,38 @@ def mamakaplari_post():
 
 @app.route('/postLike',methods=['PUT'])
 def post_like_post():
-
     connection = sqlite3.connect('db.sqlite')
     cur = connection.cursor()
-
     posts_id = int(request.json['id'])
     posts_like = int(request.json['postLike'])
-
     update = "UPDATE posts SET postLike = postLike + "+str(posts_like)+" WHERE id = " + str(posts_id)
-
     print(posts_id,posts_like)
     print("update : ", update)
     #cur.execute("""UPDATE posts SET postLike = postLike + ? WHERE id = ?""", (posts_id,posts_like,))
     cur.execute(update)
     connection.commit()
-
     update_like = cur.execute("""SELECT * FROM posts """)
     update_like = update_like.fetchall()
     connection.close()
     print(update_like)
-
     return jsonify(update_like)
 
+@app.route('/mamaKaplari/<iid>',methods=['PUT'])
+def mamakaplari_put(iid):
+    connection = sqlite3.connect('db.sqlite')
+    cur = connection.cursor()
 
+    mama_id = request.json['id']
+    mama_filling = request.json['fillingTime']
+
+    update = "UPDATE Mamalar SET fillingTime = str(mama_filling) WHERE id = mama_id"
+    cur.execute(update)
+    connection.commit()
+    update_kap = cur.execute("""SELECT * FROM Mamalar""")
+    update_kap = update_kap.fetchall()
+    connection.close()
+    print(update_kap)
+    return jsonify(update_kap)
 
 @app.route('/mamaKaplari', methods=['GET'])
 def mamakaplari_get():
@@ -247,6 +256,15 @@ def get_posts_id(id):
     post = posts.query.get(id)
     print(posts_schema.jsonify(post))
     return posts_schema.jsonify(post)
+
+@app.route('/mamaKaplari/<id>',methods=['DELETE'])
+def mamakaplari_delete(id):
+
+    mama = mamaKaplari.query.get(id)
+    db.session.delete(mama)
+    db.session.commit()
+
+    return mamakaplari_schema.jsonify(mama)
 
 
 @app.route("/posts/<id>", methods=["DELETE"])
