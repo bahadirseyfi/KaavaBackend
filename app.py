@@ -162,22 +162,27 @@ def post_like_post():
     print(update_like)
     return jsonify(update_like)
 
-@app.route('/mamaKaplari/<iid>',methods=['PUT'])
-def mamakaplari_put(iid):
+@app.route('/mamaKaplari/<id>',methods=['PUT'])
+def mamakaplari_put(id):
     connection = sqlite3.connect('db.sqlite')
     cur = connection.cursor()
 
-    mama_id = request.json['id']
-    mama_filling = request.json['fillingTime']
+    mama_id = int(request.json['id'])
+    mama_filling = str(request.json['fillingTime'])
+    print("mamafilling debug : ", mama_filling)
 
-    update = "UPDATE Mamalar SET fillingTime = str(mama_filling) WHERE id = mama_id"
-    cur.execute(update)
+    cur.execute("UPDATE Mamalar SET fillingTime =? WHERE id =? ",(str(mama_filling), str(mama_id)))
+
+    #cur.execute(update)
     connection.commit()
     update_kap = cur.execute("""SELECT * FROM Mamalar""")
+    #print("update : ", update)
     update_kap = update_kap.fetchall()
     connection.close()
     print(update_kap)
-    return jsonify(update_kap)
+    duzenlenen_kap = mamaKaplari.query.get(id)
+    print(duzenlenen_kap)
+    return mamakaplari_schema.jsonify(duzenlenen_kap)
 
 @app.route('/mamaKaplari', methods=['GET'])
 def mamakaplari_get():
