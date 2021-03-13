@@ -10,7 +10,7 @@ Flask, request, jsonify, SQLAlchemy, Marshmallow
 ```
 
 
-##Screenshoots
+## Screenshoots
 
 ![Home](https://user-images.githubusercontent.com/47535257/104244746-26461a00-5474-11eb-88f8-b15c3f7b368e.gif)
 ![Forum](https://user-images.githubusercontent.com/47535257/104244749-280fdd80-5474-11eb-993b-f10b0a8c8510.gif)
